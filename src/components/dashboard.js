@@ -7,7 +7,6 @@ import { positions } from "@mui/system";
 const Dashboard = () => {
   const [Data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [RowData, setRowData] = useState({});
   const [isEditMode, setIsEditMode] = useState(false); 
   const [RowId, setRowId] = useState(null); 
   
@@ -51,29 +50,28 @@ const Dashboard = () => {
 
   const handleEdit = (index, id) => {
     setRowId(index);
-    setRowData({ ...Data[index] });
     setIsEditMode(true);
   };
 
   const handleCancel = () => {
     setRowId(null);
-    setRowData({});
     setIsEditMode(false);
   };
 
-  const handleInputChange = (e, key) => {
-    const { value } = e.target;
-    setRowData(prevState => ({
-      ...prevState,
-      [key]: value
-    }));
+const handleInputChange = (e, key, index) => {
+  const { value } = e.target;
+  const updatedData = [...Data];
+  updatedData[index] = {
+    ...updatedData[index],
+    [key]: value
   };
+  setData(updatedData);
+};
+
 
   const handleSave = (index) => {
     console.log("Saving data for row index:", index);
-    console.log("New data:", RowData);
     setRowId(null);
-    setRowData({});
     setIsEditMode(false);
   };
 
@@ -131,7 +129,6 @@ const Dashboard = () => {
         handleSave={handleSave}
         handleInputChange={handleInputChange}
         RowId={RowId}
-        RowData={RowData}
         isEditMode={isEditMode}
       />
     </div>
