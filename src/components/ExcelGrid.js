@@ -6,15 +6,10 @@ import "../styles/dashboard.css";
 import "../styles/ExcelGrid.css";
 import LoadingSpinner from "./LoadSpinner";
 
-const ExcelGrid = ({ Data, columns, loading, handleEdit, handleCancel, handleDelete, handleSave, handleInputChange, RowId, isEditMode }) => {
-
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-    const month = monthNames[date.getMonth()];
-    const year = date.getFullYear().toString().substr(-2);
-    return `${month} ${year}`;
-  };
+const ExcelGrid = ({ data, loading, handleEdit, handleCancel, handleDelete, handleSave, handleInputChange, rowId, isEditMode }) => {
+  if (!data || data.length === 0) {
+    return <div>No data available</div>;
+  }
 
   return (
     <Container fluid className="mt-2">
@@ -26,43 +21,35 @@ const ExcelGrid = ({ Data, columns, loading, handleEdit, handleCancel, handleDel
             <Table striped bordered hover>
               <thead className="sticky-header">
                 <tr>
-                  {columns.map(({ field, headerName }) => (
-                    <th key={field}>{headerName}</th>
+                  {Object.keys(data[0]).map((field, index) => (
+                    <th key={index}>{field}</th>
                   ))}
                   <th className="action-cell">Action</th>
                 </tr>
               </thead>
               <tbody>
-                {Data.map((row, index) => (
-                  <tr key={index}>
-                    {columns.map(({ field }) => (
-                      <td key={field}>
-                        {RowId === index && isEditMode ? (
-                          field === 'ID' || field === 'MonthYear' || field === 'CompanyName' ? (
-                            <span>{row[field]}</span>
-                          ) : (
-                            <input
-                              type="text"
-                              className='GridInput'
-                              value={row[field]}
-                              onChange={(e) => handleInputChange(e, field, index)}
-                            />
-                          )
+                {data.map((row, rowIndex) => (
+                  <tr key={rowIndex}>
+                    {Object.entries(row).map(([key, value], columnIndex) => (
+                      <td key={columnIndex}>
+                        {isEditMode && rowId === rowIndex ? (
+                          <input
+                            type="text"
+                            className='GridInput'
+                            value={value}
+                            onChange={(e) => handleInputChange(e, key, rowIndex)}
+                          />
                         ) : (
-                          field === 'MonthYear' ? (
-                            <span>{formatDate(row[field])}</span>
-                          ) : (
-                            <span>{row[field]}</span>
-                          )
+                          <span>{value}</span>
                         )}
                       </td>
                     ))}
                     <td className="action-cell">
-                      {isEditMode && RowId === index ? (
+                      {isEditMode && rowId === rowIndex ? (
                         <div className="action-buttons">
                           <button
                             className="btn btn-sm Save"
-                            onClick={() => handleSave(index)}
+                            onClick={() => handleSave(rowIndex,row.id)}
                           >
                             <FontAwesomeIcon icon={faSave} />
                           </button>
@@ -77,13 +64,13 @@ const ExcelGrid = ({ Data, columns, loading, handleEdit, handleCancel, handleDel
                         <div className="action-buttons">
                           <button
                             className="btn btn-sm Edit"
-                            onClick={() => handleEdit(index)}
+                            onClick={() => handleEdit(rowIndex,row.id)}
                           >
                             <FontAwesomeIcon icon={faEdit} />
                           </button>
                           <button
                             className="btn btn-sm Delete"
-                            onClick={() => handleDelete(index)}
+                            onClick={() => handleDelete(row.id)}
                           >
                             <FontAwesomeIcon icon={faTrash} />
                           </button>
